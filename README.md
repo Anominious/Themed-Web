@@ -84,8 +84,9 @@ Each ratio is calculated with the larger value devided by the smaller value.
 ```
 
 ##### Getting Aspect Ratios
-This program calculates the aspect ratios of the bounding boxes and not the mitochondria themselves. And the lengths, widths, and heights of the bounding boxes can be mathmetically calculated with the data provided by mito_meta. 
-Since the bounding box's side lengths are number of pixels, to calculate the true ratio of each mitochondria, the x length needed to be multiplied with the pixel_length, as the y length with pixel_width and z length with page_thickness. After the calculation of each bounding box, the 3 aspect ratios are appended to an array as a vector. 
+This program calculates the aspect ratios of the bounding boxes and not the mitochondria themselves. And the lengths, widths, and heights of the bounding boxes can be mathmetically calculated with the data provided by `mito_meta`. 
+
+Since the bounding box's side lengths are number of pixels, to calculate the true ratio of each mitochondria, the x length needed to be multiplied with `pixel_length`, as the y length with `pixel_width` and z length with `page_thickness`. After the calculation of each bounding box, the 3 aspect ratios are appended to an array as a vector. 
  
 ```matlab
 x_true_dist = (floor((bbox_array(index,4)-bbox_array(index,1))/shrinked_ratio))*pixel_length;
