@@ -130,10 +130,10 @@ skel = Skeleton3D(bi_bbox);
 ##### Slicing Branches 
 As mentioned before, the length of a skeleton is calculated by adding the distances between each adjacent voxels. However, how does the program determine where to start, and when to stop? Fortunately, in the [bwmorph3](https://www.mathworks.com/help/images/ref/bwmorph3.html) function, there are 2 concepts that are very helpful: branch points, and end points. Essencially, branch poitns are voxels that have 3 or more adjacent voxels who are also in the skeleton, and end points are voxels that only have 1 adjacent voxel that is in the skeleton. 
 
-Here are examples of branch points and end points in 2d from [bwmorph]():
+Here are examples of branch points and end points in 2d from [bwmorph](https://www.mathworks.com/help/images/ref/bwmorph.html?searchHighlight=bwmorph&s_tid=srchtitle_bwmorph_1):
 
-<img src="img/bpoint_example.PNG" width="450"/>
-<img src="img/epoint_example.PNG" width="450"/>
+<img src="img/bpoint_example.PNG" width="250"/>
+<img src="img/epoint_example.PNG" width="250"/>
 
 First, the program finds the coordinates of all the branch points, and change the 1s in those coordinates into 0s. This removes the points from the skeleton, which is now sliced into branches. 
 ```matlab
