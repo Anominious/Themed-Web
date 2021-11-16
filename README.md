@@ -166,4 +166,58 @@ Now that the program have all the necessary component, it can start the calculat
 
 ##### Skeleton Length Calculation
 
+The program starts the calculation at the first end point in `endpoint_c`, registering the point as `start_point` and removing its coordinate from both arrays of coordinates: `skel_c` and `Epoint_c`, to avoid repetition . 
+```matlab
+start_point = Epoints_c(1,:);
+skel_c(find(ismember(skel_c, start_point,'rows')),:) = [];
+Epoints_c(find(ismember(Epoints_c, start_point,'rows')),:) = [];
+```
+
+Then, the program finds the coordinate of every voxel surrounding `start_point`. When I wrote the code, I separted p1~p26 by layers.
+```matlab
+p1 = [start_point(1)-1, start_point(2)-1, start_point(3)-1];
+p2 = [start_point(1), start_point(2)-1, start_point(3)-1];
+p3 = [start_point(1)+1, start_point(2)-1, start_point(3)-1];
+p4 = [start_point(1)-1, start_point(2), start_point(3)-1];
+p5 = [start_point(1), start_point(2), start_point(3)-1];
+p6 = [start_point(1)+1, start_point(2), start_point(3)-1];
+p7 = [start_point(1)-1, start_point(2)+1, start_point(3)-1];
+p8 = [start_point(1), start_point(2)+1, start_point(3)-1];
+p9 = [start_point(1)+1, start_point(2)+1, start_point(3)-1];
+
+p10 = [start_point(1)-1, start_point(2)-1, start_point(3)];
+p11 = [start_point(1), start_point(2)-1, start_point(3)];
+p12 = [start_point(1)+1, start_point(2)-1, start_point(3)];
+p13 = [start_point(1)-1, start_point(2), start_point(3)];
+p14 = [start_point(1)+1, start_point(2), start_point(3)];
+p15 = [start_point(1)-1, start_point(2)+1, start_point(3)];
+p16 = [start_point(1), start_point(2)+1, start_point(3)];
+p17 = [start_point(1)+1, start_point(2)+1, start_point(3)];
+
+p18 = [start_point(1)-1, start_point(2)-1, start_point(3)+1];
+p19 = [start_point(1), start_point(2)-1, start_point(3)+1];
+p20 = [start_point(1)+1, start_point(2)-1, start_point(3)+1];
+p21 = [start_point(1)-1, start_point(2), start_point(3)+1];
+p22 = [start_point(1), start_point(2), start_point(3)+1];
+p23 = [start_point(1)+1, start_point(2), start_point(3)+1];
+p24 = [start_point(1)-1, start_point(2)+1, start_point(3)+1];
+p25 = [start_point(1), start_point(2)+1, start_point(3)+1];
+p26 = [start_point(1)+1, start_point(2)+1, start_point(3)+1];
+```
+Then, the program checks whether any of these coordinates are in `skel_c`, which would imply the voxel being on the skeleton. Since `start_point` is an end point, there should only be 1 adjacent voxel for `start_point`. After finding the adjacent voxel, the program adds a certain distance to the float `total_distance`, based on the connectivity between the adjacent voxel and `start_point`. Then the coordinate this adjacent voxel is removed from `skel_c` to avoid repetition. Then `start_point` is redefined by the coordinates of this adjacent voxel, and start over the loop of calculation. 
+
+If the coordinate of this adjacent voxel is in `Epoint_c`, which would imply the end of a branch, the program would end the current while loop, and continue down the list of `Epoint_c`, until the array is empty. At which point, all the branches would be calculated, and the total length of the skeleton would be a float `total_distance`. 
+
+The order in which the program checks each of the 26 adjacent voxels is from the closest category of connectivity to the longest category of connectivity: surface, edge, and then point. Since the full code is too long, here is an example code for `p5`, a voxel connected to `start_point` through a surface. The rest of the possibilities are written with `elseif` statements.  
+```matlab
+if ismember(p5,skel_c,'rows') == 1
+    total_length = total_length+voxel_height;
+    skel_c(find(ismember(skel_c, p5,'rows')),:) = [];
+    if ismember(p5,Epoints_c,'rows') == 1
+        Epoints_c(find(ismember(Epoints_c, p5,'rows')),:) = [];
+        anymore = 0;
+    end
+    start_point = p5;
+```
+
 
