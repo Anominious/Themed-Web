@@ -220,4 +220,17 @@ if ismember(p5,skel_c,'rows') == 1
     start_point = p5;
 ```
 
+After the distance of every pair of adjacent voxels in every branch is added to `total_distance`, it is appended to `all_skel_lengths`, and then reset to 0. 
 
+#### Output 
+
+The aspect ratio and skeleton length of every mitochondrion are now in 2 arrays. Not it is time to combine them and output a .csv file, which is the final step of this program. 
+
+```matlab
+aspect_ratios(:,5) = all_skel_lengths(:,2);
+header = {'index','xy_ratio','xz_ratio','yz_ratio','skel_length'};
+output = [header; num2cell(aspect_ratios)];
+final_data = cell2table(output(2:end,:),'VariableNames',output(1,:));
+file_name = append(sample_name,'_mito_aspect_ratios_skel_length.csv');
+writetable(final_data,file_name);
+```
