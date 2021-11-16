@@ -40,7 +40,7 @@ Connected point (8 total):
 
 The function takes 7 inputs: mito_meta_file_name, pixel_length, pixel_width, page_thickness, shrinked_ratio, sample_name, and full__h5_directory. Since the h5 file is exported as 2048/2048pixels resolution, the resolution can be different from the original image volume. The "shrinked_ratio" is simply origianl image volume length/2048. The rest of the inputs are pretty self explanitory. An example would be: 
 ```matlab
-mito_skel_length_aspect_ratio_calculator('mouse_mito_meta',16,16,40,2,'Mouse','C:\mito_project\mouse_h5_folder\mouse_mito_16nm.h5')
+mito_skel_length_aspect_ratio_calculator('mouse_mito_meta',16,16,40,2,'mouse','C:\mito_project\mouse_h5_folder\mouse_mito_16nm.h5')
 ```
 
 #### Getting Started 
@@ -62,10 +62,13 @@ end
 ```
 Also calculate the potential distancse in nanometers between two adjacent voxels, based on pixel length, pixel width, page thickness, and connectivity. 
 ```matlab
-edge_dist_a = sqrt(pixel_length^2+pixel_width^2);
-edge_dist_b = sqrt(pixel_length^2+page_thickness^2);
-edge_dist_c = sqrt(pixel_width^2+page_thickness^2);
-point_dist = sqrt(pixel_length^2+pixel_width^2+page_thickness^2);
+voxel_length = pixel_length*shrinked_ratio; 
+voxel_width = pixel_width*shrinked_ratio; 
+voxel_height = page_thickness; 
+edge_dist_a = sqrt(voxel_length^2+voxel_width^2);
+edge_dist_b = sqrt(voxel_length^2+voxel_height^2);
+edge_dist_c = sqrt(voxel_width^2+voxel_height^2);
+point_dist = sqrt(voxel_length^2+voxel_width^2+voxel_height^2);
 ```
 
 #### Aspect Ratio 
@@ -89,12 +92,36 @@ This program calculates the aspect ratios of the bounding boxes and not the mito
 Since the bounding box's side lengths are number of pixels, to calculate the true ratio of each mitochondria, the x length needed to be multiplied with `pixel_length`, as the y length with `pixel_width` and z length with `page_thickness`. After the calculation of each bounding box, the 3 aspect ratios are appended to an array as a vector. 
  
 ```matlab
-x_true_dist = (floor((bbox_array(index,4)-bbox_array(index,1))/shrinked_ratio))*pixel_length;
-y_true_dist = (floor((bbox_array(index,5)-bbox_array(index,2))/shrinked_ratio))*pixel_width;
+x_true_dist = (bbox_array(index,4)-bbox_array(index,1))*pixel_length;
+y_true_dist = (bbox_array(index,5)-bbox_array(index,2))*pixel_width;
 z_true_dist = (bbox_array(index,6)-bbox_array(index,3))*page_thickness;
 xy_ar = get_ratio(x_true_dist,y_true_dist);
 xz_ar = get_ratio(x_true_dist,z_true_dist);
 yz_ar = get_ratio(y_true_dist,z_true_dist);
 aspect_ratios = [aspect_ratios;
-                   [mito_index(index) xy_ar xz_ar yz_ar]];
+                  [mito_index(index) xy_ar xz_ar yz_ar]];
 ```
+
+#### Skeleton Length
+
+##### Extracting the Boundary Box and Generating the Skeleton
+Reading the full h5 file is way too much work. Therefore, for each mitochondrion, this program only read the part of the h5 defined by the mitochondrion's bounding box. Also due to h5 files' sheer sizes, the previous step, the python program that convert image stacks to h5 files, shrinked the image stacks from whatever dimention to 2048 pixel x 2048 pixel. Therefore, to find the start and distance in the h5 files, this program needs to devide the data from mito meta with the shrinked ratio, or the `h5read()` would have exceed limit errors. And since a python program, whose index starts with 0, generated the 5h, this program, a matlab program, whose index starts with 1, need to +1 to the values to eliminate 0 values.
+The approximate bounding box, which is a 3d array, needs to be binarized according to the greyscale index of the mitochondrion in each loop, since skeletonization can only be used in binarized arrays/images.
+Afterwards, the skeleton of the mitochondrion can be generated with just a single line of code. 
+
+```matlab
+x_start = floor(bbox_array(index,1)/shrinked_ratio)+1;
+y_start = floor(bbox_array(index,2)/shrinked_ratio)+1;
+z_start = bbox_array(index,3)+1;
+x_distance = floor((bbox_array(index,4)-bbox_array(index,1))/shrinked_ratio)+1;
+y_distance = floor((bbox_array(index,5)-bbox_array(index,2))/shrinked_ratio)+1;
+z_distance = bbox_array(index,6)-bbox_array(index,3)+1;
+start = [x_start y_start z_start];
+count =[x_distance y_distance z_distance];
+bbox = h5read(full__h5_directory,'/images',start,count);
+bi_bbox = bbox == mito_index(index);
+skel = Skeleton3D(bi_bbox);
+```
+
+
+
