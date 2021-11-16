@@ -119,9 +119,51 @@ z_distance = bbox_array(index,6)-bbox_array(index,3)+1;
 start = [x_start y_start z_start];
 count =[x_distance y_distance z_distance];
 bbox = h5read(full__h5_directory,'/images',start,count);
+%binarize the content within boundary box, removing all content other than the selected mito, according to grey value
 bi_bbox = bbox == mito_index(index);
+%make the skeleton of the mito
 skel = Skeleton3D(bi_bbox);
 ```
 
+##### Slicing Branches 
+As mentioned before, the length of a skeleton is calculated by adding the distances between each adjacent voxels. However, how does the program determine where to start, and when to stop? Fortunately, in the [bwmorph3](https://www.mathworks.com/help/images/ref/bwmorph3.html) function, there are 2 concepts that are very helpful: branch points, and end points. Essencially, branch poitns are voxels that have 3 or more adjacent voxels who are also in the skeleton, and end points are voxels that only have 1 adjacent voxel that is in the skeleton. 
+
+First, the program finds the coordinates of all the branch points, and change the 1s in those coordinates into 0s. This removes the points from the skeleton, which is now sliced into branches. 
+```matlab
+%find branch points and their coordinates
+Bpoints = bwmorph3(skel,'branchpoints');
+Bpoints_c = [];
+[row, col, page] = findND(Bpoints == 1);
+for i = length(row)
+    Bpoints_c = [Bpoints_c; [row, col, page]];
+end
+%slicing branches
+branches = skel - Bpoints;
+```
+
+Then, find the coordinates of endpoints of every branch and append them in an array as vectors. 
+```mtalab
+Epoints = bwmorph3(branches,'endpoints');
+Epoints_c = [];
+[row, col, page] = findND(Epoints == 1);
+for i = length(row)
+    Epoints_c = [Epoints_c; [row, col, page]];
+end
+```
+
+Since each branch has 2 end points, the length of `Epoints_c` is always even, and the coordinates in it can always be paired up. 
+
+Last but not least, find the coordinates of all points in all branches
+```matlab
+skel_c = [];
+[row, col, page] = findND(branches == 1);
+for i = length(row)
+    skel_c = [skel_c; [row, col, page]];
+end
+```
+
+Now that the program have all the necessary component, it can start the calculation of the length of the skeleton!
+
+##### Skeleton Length Calculation
 
 
