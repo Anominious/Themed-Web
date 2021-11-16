@@ -9,6 +9,7 @@ You can download the .m file [here](https://www.mathworks.com/matlabcentral/file
 A bounding box of a section is decided by its largest and smallest values in x, y, and z direction. The length, width, and height of a bounding box can be obtained by doing subtractions bewteen each pair of x, y, and z values. 
 
 Here is an example of a bounding box in the total volume:
+
 <img src="img/bbox.png" width="300"/>
 
 #### Aspect Ratio
