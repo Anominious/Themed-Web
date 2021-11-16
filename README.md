@@ -105,9 +105,9 @@ aspect_ratios = [aspect_ratios;
 #### Skeleton Length
 
 ##### Extracting the Boundary Box and Generating the Skeleton
-Reading the full h5 file is way too much work. Therefore, for each mitochondrion, this program only read the part of the h5 defined by the mitochondrion's bounding box. Also due to h5 files' sheer sizes, the previous step, the python program that convert image stacks to h5 files, shrinked the image stacks from whatever dimention to 2048 pixel x 2048 pixel. Therefore, to find the start and distance in the h5 files, this program needs to devide the data from mito meta with the shrinked ratio, or the `h5read()` would have exceed limit errors. And since a python program, whose index starts with 0, generated the 5h, this program, a matlab program, whose index starts with 1, need to +1 to the values to eliminate 0 values.
-The approximate bounding box, which is a 3d array, needs to be binarized according to the greyscale index of the mitochondrion in each loop, since skeletonization can only be used in binarized arrays/images.
-Afterwards, the skeleton of the mitochondrion can be generated with just a single line of code. 
+Reading the full h5 file is way too much work. Therefore, for each mitochondrion, this program only read the part of the h5 defined by the mitochondrion's bounding box. Also due to the sheer sizes of h5 files, the image stacks are shrinked from their origin dimentions to 2048 pixel x 2048 pixel x original page number. Therefore, to find the start and distance in the h5 files, this program needs to devide the data from mito meta with the shrinked ratio, or the `h5read()` would have exceed limit errors. And since the h5 files are generated with a python program, whose index starts with 0, this program, a matlab program, whose index starts with 1, need to +1 to the values to eliminate 0 values.
+
+The approximate bounding box, which is a 3d array, needs to be binarized according to the greyscale index of the mitochondrion in each loop, since skeletonization can only be used in binarized arrays/images. Afterwards, the skeleton of the mitochondrion can be generated with just a single line of code. 
 
 ```matlab
 x_start = floor(bbox_array(index,1)/shrinked_ratio)+1;
